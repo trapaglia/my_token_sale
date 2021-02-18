@@ -1,3 +1,4 @@
+const BN = require('bn.js');
 var BeToken = artifacts.require('BeToken');
 var BeTokenSale = artifacts.require('BeTokenSale');
 
@@ -7,6 +8,7 @@ contract('BeTokenSale', function(accounts) {
     var admin = accounts[0];
     var buyer = accounts[1];
     var tokenPrice = 2000000000000000; // in wei
+    var tokenPriceEth = 0.002; // in eth 
     var tokensAvailable = 750000;
     var numberOfTokens = 15
     var value = numberOfTokens * tokenPrice;
@@ -56,8 +58,10 @@ contract('BeTokenSale', function(accounts) {
             return tokenSaleInstance.buyTokens(numberOfTokens, {from: buyer, value: 2});
         }).then(assert.fail).catch(function(error) {
             assert(error.message.indexOf('revert') >= 0, 'msg.value must equal number of tokens in wei');
-            return tokenSaleInstance.buyTokens(800000, {from: buyer, value: (8000 * tokenPrice).toFixed() });
+            var tempPrice = 800000 * tokenPriceEth;
+            return tokenSaleInstance.buyTokens(800000, {from: buyer, value: new BN(tempPrice) });
         }).then(assert.fail).catch(function(error) {
+            // assert.equal(error.message, "algo", "bla"); //have to find workaround for big numbesr
             assert(error.message.indexOf('revert') >= 0, 'cannot purchase more tokens than available');
         });
     });
